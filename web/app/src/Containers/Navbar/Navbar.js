@@ -2,6 +2,7 @@
  * Created by PY-DEV on 2/10/2017.
  */
 import React, { Component } from 'react';
+import { Link } from 'react-router';
 import { Button, Icon, Menu } from 'semantic-ui-react';
 
 
@@ -42,7 +43,15 @@ class Navbar extends Component{
                         >
                             Quest
                         </Menu.Item>
+                        <Menu.Item
+                            name="Login"
+                            active={activeItem === 'login'}
+                            onClick={this.handleItemClick}
+                        >
+                            <Link to="/login/Login">Login</Link>
+                        </Menu.Item>
                     </Menu>
+
                 </div>
             )
         }
