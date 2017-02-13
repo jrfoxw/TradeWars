@@ -19,7 +19,6 @@ class SignUpForm extends Component {
                 <Grid.Row centered>
                     <Grid.Column width={8}>
                         <h1> { title } </h1>
-                        <h2> To access account </h2>
                         <Form widths>
                             <Form.Field>
                                 <label>Usename</label>
@@ -55,7 +54,7 @@ class SignUpForm extends Component {
 }
 
 SignUpForm.propTypes = {
-    title: React.PropTypes.string.isRequired
+
 };
 
 export default SignUpForm;

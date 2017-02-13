@@ -30,17 +30,6 @@ class App extends Component {
           {loggedIn }
 
 
-
-          <Grid.Row>
-              <Grid.Column width="8"
-                           style={{ padding:"5px",
-                                    }}>
-
-                   <DiceRoller/>
-
-              </Grid.Column>
-          </Grid.Row>
-
       </div>
     );
   }

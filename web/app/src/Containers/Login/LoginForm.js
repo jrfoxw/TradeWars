@@ -20,7 +20,7 @@ class LoginForm extends Component {
                 <Grid.Row centered>
                     <Grid.Column width={8}>
                         <h1> { title } </h1>
-                        <h2> To access account </h2>
+
                         <Form widths>
                             <Form.Field>
                                 <label>Username

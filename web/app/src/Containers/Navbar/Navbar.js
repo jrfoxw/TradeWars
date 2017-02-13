@@ -41,7 +41,7 @@ class Navbar extends Component{
                             active={activeItem === 'quest'}
                             onClick={this.handleItemClick}
                         >
-                            Quest
+                            <Link to="/quest">Quest</Link>
                         </Menu.Item>
                         <Menu.Item
                             name="Login"
