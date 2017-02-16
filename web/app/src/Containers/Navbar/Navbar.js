@@ -3,7 +3,7 @@
  */
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import { Button, Icon, Menu } from 'semantic-ui-react';
+import { Button, Icon, Menu, Container, Grid} from 'semantic-ui-react';
 
 
 class Navbar extends Component{
@@ -20,8 +20,10 @@ class Navbar extends Component{
             const { activeItem } = this.state;
             return(
 
-                <div>
-                    <Menu>
+                <Grid.Row>
+                    <Grid.Column>
+                        <Container>
+                    <Menu fluid widths={4}>
                         <Menu.Item
                             name="logo"
                             active={activeItem === 'logo'}
@@ -34,7 +36,7 @@ class Navbar extends Component{
                             active={activeItem === 'players'}
                             onClick={this.handleItemClick}
                         >
-                            Players
+                            <Link to="/players">Players</Link>
                         </Menu.Item>
                         <Menu.Item
                             name="Quests"
@@ -51,8 +53,9 @@ class Navbar extends Component{
                             <Link to="/login/Login">Login</Link>
                         </Menu.Item>
                     </Menu>
-
-                </div>
+                        </Container>
+                    </Grid.Column>
+                </Grid.Row>
             )
         }
 

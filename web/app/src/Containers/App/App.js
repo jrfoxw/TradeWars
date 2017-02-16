@@ -23,14 +23,14 @@ class App extends Component {
       const { activeItem } = this.state;
       const loggedIn = false;
     return (
-      <div className="App">
+      <Grid columns={1}>
 
             <Navbar/>
           {this.props.children}
           {loggedIn }
 
 
-      </div>
+      </Grid>
     );
   }
 }

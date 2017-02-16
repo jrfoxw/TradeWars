@@ -9,6 +9,7 @@ import Login from './Containers/Login';
 import SignUp from './Containers/Signup';
 import Roller from './Common/diceRoller';
 import Quest from './Containers/Quest';
+import Players from './Containers/Players';
 
 import store from './store'
 import './index.css';
@@ -22,10 +23,12 @@ ReactDOM.render(
          <Route path="/" component={App}>
             <Route path="/login" component={Login}/>
             <Route path="/login/:title" component={Login}/>
+             <Route path="/signup" component={SignUp}/>
             <Route path="/signup/:title" component={SignUp}/>
 
          <Route path="/roller" component={Roller}/>
          <Route path="/quest" component={Quest}/>
+         <Route path="/players" component={Players}/>
          </Route>
      </Router>
  </Provider>,

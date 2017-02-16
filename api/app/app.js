@@ -1,20 +1,29 @@
-const express = require('express');
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const socketIO = require('socket.io');
+import express from 'express';
+import path from 'path' ;
+import favicon from 'serve-favicon' ;
+import logger from 'morgan' ;
+import cookieParser from 'cookie-parser' ;
+import bodyParser from 'body-parser' ;
+import socketIO from 'socket.io' ;
+import cors from 'cors' ;
 
-const index = require('./routes/index');
-const users = require('./routes/users');
+import knex from 'knex' ;
+import pg from 'knex';
+
+import index from './routes/index' ;
+import users from './routes/users' ;
+import login from './routes/auth' ;
+import signup from './routes/signup' ;
+import players from './routes/players';
+
+
 
 const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
+app.use(cors());
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -24,11 +33,15 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/users', users);
+app.use('/api/users', users);
+app.use('/api/auth', login);
+app.use('/api/signup', signup);
+app.use('/api/players', players);
+
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-  var err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });

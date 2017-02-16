@@ -16,7 +16,7 @@ class LoginForm extends Component {
         const { title } = this.props.params;
         return (
 
-            <Grid >
+            <Grid columns={1}>
                 <Grid.Row centered>
                     <Grid.Column width={8}>
                         <h1> { title } </h1>
@@ -52,10 +52,10 @@ class LoginForm extends Component {
                     </Grid.Column>
                 </Grid.Row>
                 <Grid.Row centered >
-                    <Grid.Column width={8} offset={2}>
-                        <Container>
+                    <Grid.Column width={8} >
+
                             <Link to="/signup/SignUp">create account</Link>
-                        </Container>
+
                     </Grid.Column>
                 </Grid.Row>
             </Grid>

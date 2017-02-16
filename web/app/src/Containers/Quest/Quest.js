@@ -16,8 +16,12 @@ class Quest extends Component{
             <Container centered>
 
                 <h2> Quest Mode</h2>
+                <h4> The Journey of a thousand miles begins with the first step...</h4>
+                <h5> In quest mode you search for items by battling random creatures and
+                    increasing your loot. You may occasionaly run into NPC's who will ask
+                    special requests of you.</h5>
                 <Grid.Row>
-                    <Grid.Column width="8"
+                    <Grid.Column
                                  style={{ padding:"5px",
                                  }}>
 
@@ -26,7 +30,7 @@ class Quest extends Component{
 
                 <Grid.Row>
                     <Grid.Column>
-                        <Roller/>
+
                     </Grid.Column>
                 </Grid.Row>
 

@@ -5,11 +5,21 @@ module.exports = {
   development: {
     client: 'postgresql',
     connection: {
-      database: '',
-      user: '',
-      password: '',
+      host:'localhost',
+        port:'5400',
+      database: 'twars',
+      user: 'admin',
+      password: 'test',
+        charset:'utf8'
 
-    }
+    },
+      pool: {
+          min: 2,
+          max: 10
+      },
+      migrations: {
+          tableName: 'knex_migrations'
+      }
   },
 
   staging: {
