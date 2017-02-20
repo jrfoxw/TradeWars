@@ -3,7 +3,12 @@
  */
 import React, {Component} from 'react';
 import {Button, Icon, Form, Grid} from 'semantic-ui-react';
+
+import { connect } from 'react-redux';
+
 import axios from 'axios';
+import { signUpUser } from '../../Actions/auth'
+import { fetchPlayers } from '../../Actions/players'
 
 
 class SignUpForm extends Component {
@@ -29,13 +34,18 @@ class SignUpForm extends Component {
     handleOnSubmit(event) {
         event.preventDefault();
         console.log('Final State, ',this.state);
-        axios.post('http://192.168.1.130:3001/api/signup',{user:this.state})
-            .then((res) =>{
-                console.log("User Posted: ",res)
-            })
-            .catch((err) =>{
-                console.log("Error: ",err)
-            })
+        signUpUser(this.state).then((res) => {
+            console.log('Succesfully signed up.');
+            this.context.router.push('/login/Login')
+        }).catch((err) =>{
+            console.log("Can't sign up user.. ",err)
+        });
+        fetchPlayers(this.state).then((res) =>{
+            console.log('Fetched Players.. ',res)
+            
+        })
+
+
 
 
     }
@@ -108,4 +118,14 @@ SignUpForm.propTypes = {
 
 };
 
-export default SignUpForm;
+SignUpForm.contextTypes = {
+    router: React.PropTypes.object.isRequired,
+};
+
+function mapStateToProps(state){
+    return{
+        user: state.Auth,
+    }
+}
+
+export default connect(mapStateToProps, { signUpUser, fetchPlayers })(SignUpForm);

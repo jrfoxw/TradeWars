@@ -1,0 +1,14 @@
+.loginErrors{
+
+     color:red;
+     font-size:18px;
+     padding:20px;
+     background-color:lightcoral;
+     opacity:.5;
+     border-radius:15px
+}
+
+.loginClean{
+
+    opacity:.5
+}
