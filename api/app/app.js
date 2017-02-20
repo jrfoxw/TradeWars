@@ -32,11 +32,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// test data
 app.use('/', index);
 app.use('/api/users', users);
 app.use('/api/auth', login);
 app.use('/api/signup', signup);
-app.use('/api/players', players);
+// app.use('/api/players', players);
 
 
 // catch 404 and forward to error handler

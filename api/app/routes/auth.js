@@ -37,13 +37,15 @@ router.post('/', (req, res) => {
             // add token
             const token = jwt.sign({
                 id: user.get('id'),
-                username: user.get( 'username' )
+                username: user.get( 'user_name' ),
+                avatar: user.get('user_avatar'),
+                email: user.get('user_email')
             }, config.jwtSecret);
 
             res.status(200).json({ token })
 
         } else {
-            res.status(401).json({ error: 'Invalid Credentials' })
+            res.status(401).json( {errors: { error: 'Invalid Credentials' } })
         }
     }).catch(err =>{ res.status(401)
         .json({ msg: 'Invalid Credentials', error: err })})
