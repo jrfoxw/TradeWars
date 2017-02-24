@@ -14,6 +14,7 @@ import Home from './Containers/Homepage';
 import Create from './Containers/Create';
 import QCreator from './Components/QuestCreator';
 import QSelect from './Components/QuestCreator';
+import DungeonMap from './Components/DungeonMap';
 
 
 import store from './store';
@@ -43,6 +44,9 @@ ReactDOM.render(
 
          <Route path="/players" component={Players}/>
          <Route path="/create" component={Create}/>
+
+         <Route path="/dungeon" component={DungeonMap}/>
+
          </Route>
      </Router>
  </Provider>,

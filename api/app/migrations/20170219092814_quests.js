@@ -4,12 +4,14 @@ exports.up = function(knex, Promise) {
       table.increments('id');
       table.string('quest_id');
       table.string('quest_title');
+      table.string('quest_image');
       table.string('quest_type');
-      table.string('quest_level');
-      table.string('quest_difficulty');
+      table.boolean('quest_repeat').defaultTo('true');
+      table.string('quest_level').defaultTo(1);
+      table.string('quest_difficulty').defaultTo('easy');
       table.string('quest_desc');
       table.string('quest_stages_total'); // how many stages in quest
-      table.string('quest_stages'); // needs at least one stage.
+      table.string('quest_stages'); // needs at least 3 stages.
    });
   
 };

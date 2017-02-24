@@ -1,0 +1,42 @@
+{
+  "144Rtt83":
+        {
+          "title":"The Wayward Goblin",
+          "image":"http://imagebackground.jpg",
+          "quest_desc":"This quest requires to find a lost goblin kid.",
+          "quest_type":"deliver",
+          "quest_repeat":true,
+          "quest_level":1,
+          "quest_base_difficulty":"easy",
+          "quest_enc_difficulty":"easy",
+          "quest_enc_frequency":"basic",
+          "quest_stage_total":1,
+          "quest_stages":
+              {
+                  "stage_1":
+                  {
+                    "description":"A young goblin has lost his way in the woods, find him and bring him home",
+                    "items_given":"none",
+                    "action":"find-creature"
+                  },
+
+                  "stage_2":
+                  {
+                    "description":"You encounter a Wolf it growls as your hear the young goblin crying behind it.",
+                    "encounter":true,
+                    "encounter_type":"Creature ID: 23492a",
+                    "drops":"none",
+                    "complete":"You defeated the 23f92a and found the young goblin, now take him home!"
+                  },
+
+                  "stage_3":
+                  {
+                    "description":"You return the young goblin back to its family",
+                    "reward":"50 random gold",
+                    "completed":true
+                  }
+              }
+
+
+        }
+}
