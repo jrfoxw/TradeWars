@@ -4,8 +4,12 @@ import favicon from 'serve-favicon' ;
 import logger from 'morgan' ;
 import cookieParser from 'cookie-parser' ;
 import bodyParser from 'body-parser' ;
+import http from 'http'
 import socketIO from 'socket.io' ;
 import cors from 'cors' ;
+import Canvas from 'canvas';
+import 'node-easel';
+
 
 import knex from 'knex' ;
 import pg from 'knex';
@@ -17,9 +21,44 @@ import signup from './routes/signup' ;
 import players from './routes/players';
 import dungeon from './routes/dungeon';
 
+import DrawMap from  './utils/drawMap';
+import pAvatar from './utils/processAvatar';
+
+let newMap = new DrawMap;
+
+let room = newMap.createPreBuiltRoom();
+newMap.buildRoom(room);
+
+
+
+
 
 
 const app = express();
+
+// import makeSocket from './utils/makeSocket';
+//
+// let sock = new makeSocket;
+// sock.init();
+
+// const server = http.createServer(app);
+// const io = socketIO(server);
+// server.listen(3005);
+
+
+// io.on(('connection'), (socket)=>{
+//   console.log('Socket Connected');
+//   socket.emit('senddata', {data:"testing"});
+//   socket.on('socketid', (data)=>{
+//     console.log(data)
+//   });
+//
+//
+//
+// });
+
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,7 +70,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/static',express.static(path.join(__dirname, 'public')));
 
 // test data
 app.use('/', index);
@@ -59,5 +98,9 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.render('error');
 });
+
+// let v = new pAvatar;
+// v.proccess('Dwarven_Warrior_SM.jpg','./public/images',"_AVATAR_");
+
 
 module.exports = app;

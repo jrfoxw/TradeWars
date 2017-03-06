@@ -3,8 +3,13 @@ import { connect } from 'react-redux';
 import {Button, Icon, Form, Grid, Container, Image, Label, Dimmer, Loader, Segment, Menu} from 'semantic-ui-react';
 import Images from './images/DungeonImages'
 import _ from 'lodash';
-import shortU from 'short-uuid'
-import Encounter from './utils/encounter'
+import shortU from 'short-uuid';
+import { addMessage, getMessage, delMessage } from '../../Actions/flashActions'
+// import flash from '/utils/flashMessage';
+import PlayerStatus from './PlayerStatus';
+import MobStatus from './MobStatus';
+import Encounter from './utils/encounter';
+
 
 
 class DungeonMap extends Component{
@@ -14,33 +19,48 @@ class DungeonMap extends Component{
                         room:[],
                         pos:0,
                         player:{px:5,py:5},
-                        flash:"Click a direction to begin..",
+                        flash:{color:"white",msg:"Click a direction to begin.."},
+                        history:[],
                         isLoading: true,
                         attack: true,
                         defense: true,
                         flee: true,
+                        att: 4,
+                        def: 1,
+                        hp: 30,
+                        dex: 10,
+                        attacking: false,
+                        mobsLoc:{}
+
 
         };
+
+
+
+        // room defaults..
         this.room = [];
-        this.gridValue = 0;
-        this.map_grid_data = {};
-        this.map_grid_loc = [8,8];
-        this.grid_data = {};
-        this.room_value = 99;
         this.grid_size = {'gridx':0,'gridy':0};
         this.gridx = 0;
         this.gridy = 0;
+
+
+        // combat status
         this.combat = false;
+        this.mobsLoc = {};
+
+
+        //creature
+        this.currentMob = {attacker:{image:<Image/>,att:0,def:0,hp:0}};
 
         // Objects
-        // this.wall = <Image  src={wall} inline/>;
-        this.floor = <Image  src={Images.floor} inline/>;
-        this.player_avatar = <Image key={"player_"+shortU.uuid()} src={this.props.user.user.avatar} width="32" height="31" inline bordered/>;
-        // this.gold = <Image name="gold" key={"gold"+shortU.uuid()} src={goldChest} width="32" height="32" inline/>
+
         this.impassable = ['wall'];
 
         // player
-        this.player = {inventory:{right:'copper dagger',left:'wooden buckler',belt:'cheese'}
+        this.player_avatar = <Image key={"player_"+shortU.uuid()} src={this.props.user.user.avatar} width="32" height="31" inline bordered/>;
+        this.player = {
+                       stats:{att:2,def:1,hp:30}
+                      ,inventory:{right:'copper dagger',left:'wooden buckler',belt:'cheese'}
                       ,currency:{gold:0,silver:0,gems:0}};
 
         //bindings
@@ -56,25 +76,19 @@ class DungeonMap extends Component{
     }
 
 
-
-
     componentWillMount(){
         this.setState({ isLoading: false });
 
     }
 
     componentDidMount(){
+        console.log('Flash: ',this.props.flash.message);
         this.create_room_raw();
-        this.drawPlayerSprite(Math.round(this.gridx/2), Math.round(this.gridy/2));
+
+        // this.drawPlayerSprite(Math.round(this.gridx/2), Math.round(this.gridy/2));
         this.showRoom();
     }
 
-    // grid2 = a => { return a.map((_, c) => a.map(r => console.log([c])))};
-
-
-    // componentDidUpdate(){
-    //     this.scrollToBottom();
-    // }
 
 
     create_room_raw(){
@@ -90,8 +104,6 @@ class DungeonMap extends Component{
         let gridy = this.grid_size.gridy.length;
         this.gridx = gridx;
         this.gridy = gridy;
-
-
 
 
         // Create arrays of 2 dimensional room
@@ -121,29 +133,24 @@ class DungeonMap extends Component{
 
         }
 
+        // Set player
+
+        let grid_center = [Math.round(this.gridx/2), Math.round(this.gridy/2)];
+
+        this.room[grid_center[0]][grid_center[1]] = this.player_avatar;
+
+
         // place gold
-
-
-        // this.room[1][1] = <Image name="gold" key={"gold"+shortU.uuid()} src={Images.hidden} width="32" height="32" inline/>;
-
         this.placeGold();
 
-
-        this.setState({player:{px:5, py:5}});
+        // set player position and map into state
+        this.setState({player:{px:grid_center[0], py:grid_center[1]}});
         this.setState({room:room});
         console.log('Room State', this.room[2][5]);
-
-        // return this.room.map((value, key) => <div style={{ fontFamily:"monospace"}} key={key}>{value}</div>)
-
 
     };
 
 
-    redrawRoom(){
-
-
-
-    }
 
     placeGold(){
         // Randomly place gold
@@ -165,14 +172,26 @@ class DungeonMap extends Component{
     }
 
 
-    flashMessage(message){
+    procMessages(color, message){
+        let text = message;
+        this.setState({flash:{color:color,msg:text}});
+        this.setState({history:[...this.state.history, text]});
+        const id = shortU.uuid();
+        let tMessage ={
+            id: id,
+            text: text
+        };
 
+        this.props.addMessage({
+            color: color,
+            message: tMessage,
+            history: this.state.history,
 
-        this.messageHistory.push(message);
-        this.setState({flash: message})
+        });
     }
 
 
+    // Collision Detection
     collDetect(pdir){
 
         let { px, py } = this.state.player;
@@ -184,24 +203,24 @@ class DungeonMap extends Component{
         const pyM1 = roomData[px][py-1];
 
         if(this.combat){
-            this.flashMessage("You are currently in combat mode and must either Attack, Defend or Flee");
+            this.procMessages("gold","You are currently in combat and must either Attack, Defend or Flee");
             return false;
         }
 
         // found gold
         if(pdir.props.name === "gold"){
             console.log('Found gold!!');
-            let gold = _.random(5,15);
-            let message = <div style={{ color:"orange" }}>Found {gold} pieces of Gold!</div>;
-            this.flashMessage(message);
-            this.player.inventory.gold+= gold;
+            this.foundGold();
 
             return true;
         }
 
         if(pdir.props.name === "wall"){
             console.log('Moving toward wall..');
-            this.flashMessage(<div>A moss covered wall blocks your path..</div>);
+
+            this.procMessages("white","A moss covered wall blocks your path..");
+
+
             pdir === pxM1 ? px++ : null;
             pdir === pxP1 ? px-- : null;
             pdir === pyP1 ? py-- : null;
@@ -217,25 +236,111 @@ class DungeonMap extends Component{
     }
 
 
-    drawPlayerSprite(px, py) {
-        console.log('Player',px,py);
-        this.room[px][py] = this.player_avatar;
-        this.setState({player: {px: px, py: py }});
-        this.setState({room: this.room});
-        console.log("Room in state", this.state.room);
+
+    foundGold(creature){
+        let gold = _.random(5, 15);
+        if(!creature) {
+
+            this.procMessages("orange",`Found ${gold} pieces of Gold!`);
+            // flash(message);
+            this.player.currency.gold += gold;
+            }else{
+                this.procMessages("blue",`The ${creature} dropped {gold} pieces of gold!`)
+            }
+        }
+
+
+    mobAttack() {
+
+        let damageRoll = 0;
+        let damage = 0;
+        let block = 0;
+        let toHit = _.random(1, 10);
+        let {att, def, name} = this.currentMob.attacker;
+
+        damageRoll = _.random(1, this.currentMob.attacker.att);
+        block = this.state.def;
+        damage = damageRoll - block;
+        this.setState({hp: this.state.hp -= damage});
+
+        this.procMessages("red",`The ${name} attacks you!`);
+        if (toHit > 6) {
+            // roll damage
+            damageRoll = _.random(1, att);
+            block = this.player.stats.def;
+            damage = damageRoll - block;
+            this.setState({hp: this.state.hp -= damage});
+            if (this.state.hp >= 0 || damage > 0) {
+
+                this.procMessages("red",`You take ${damage} points of damage!` )
+
+            }else{
+                this.procMessages("white",`The ${name} hits,  but you absorb all ${damageRoll} points of damage!`)
+            }
+        } else {
+            this.procMessages("red",`Your deflect the ${name}'s attack!`)
+        }
     }
 
-
     playerAttack(event){
-        this.flashMessage(<div style={{ color: "yellow" }}>You swing wildly..</div>)
+
+        let damageRoll = 0;
+        let damage = 0;
+        let block = 0;
+
+        let { name, hp } = this.currentMob.attacker;
+
+        // Roll player attack
+        let toHit = _.random(1,10)+1;
+
+        // Does toHit beat mobs toHit?
+        if(toHit > this.currentMob.attacker.toHit){
+            // roll damage
+            damageRoll = _.random(1, this.state.att);
+            block = this.currentMob.attacker.def;
+            damage = damageRoll - block;
+            hp = this.currentMob.attacker.hp -= damage;
+            if(hp>=0) {
+                this.procMessages("red",`${name} takes ${damage} points of damage! HP:${hp}`);
+                this.room[this.state.mobsLoc.loc[0]][this.state.mobsLoc.loc[1]] =
+                    <Image src={Images.hit} inline/>;
+                    this.setState({room: this.room});
+                    setTimeout(() => {
+                        this.room[this.state.mobsLoc.loc[0]][this.state.mobsLoc.loc[1]] =
+                            <Image key={shortU.uuid()} src={this.currentMob.attacker.image} inline />;
+                        this.setState({ room: this.room});
+                        this.mobAttack();
+
+                    }, 300);
+                }else{
+                this.procMessages("orange",`${name} has died!`);
+                    this.room[this.state.mobsLoc.loc[0]][this.state.mobsLoc.loc[1]] = <Image key={shortU.uuid()} src={Images.remains} inline/>
+                    setTimeout(() =>{
+                        this.combat = false;
+                        this.procMessages("orange", `searching remains...`);
+                        this.state.attack = true;
+                        this.state.defense = true;
+                    },3000);
+
+                    setTimeout(() =>{this.foundGold()},5000)
+                }
+
+
+        }else {
+            this.procMessages("red",`Your attack deflects of the ${name}'s hardened skin!`);
+            setTimeout(() =>{
+                this.mobAttack()
+            },2000);
+
+        }
     }
 
     playerDefend(event){
-        this.flashMessage(<div style={{ color: "green" }}>You attempt to defend yourself..</div>)
+        this.procMessages("green", `You attempt to defend yourself..`)
     }
 
     playerFlee(event){
-        this.flashMessage(<div style={{ color: "yellow" }}>You try to run away..</div>)
+        this.procMessages("yellow", `You try to run away..`)
     }
 
     playerInventory(event){
@@ -244,89 +349,151 @@ class DungeonMap extends Component{
         console.log("Player Stuff ",pi);
         const stuff = _.map(pi,(value, key) =>
             <div style={{ color: "white"}} key={key}>{key} : {value}</div>);
-        this.flashMessage(<div style={{ color: "blue" }}>You are currently carrying..{stuff}</div>)
+        this.procMessages("blue",`You are currently carrying..${stuff}`);
     }
 
-    movePlayerSprite(event){
+    movePlayerSprite(event) {
 
         let {px, py} = this.state.player;
-        this.state.flash ? this.setState({flash:""}) : this.state.flash;
+        this.state.flash ? this.setState({flash: ""}) : this.state.flash;
         const roomData = this.room;
-        const pxM1 = roomData[px-1][py];
-        const pxP1 = roomData[px+1][py];
-        const pyP1 = roomData[px][py+1];
-        const pyM1 = roomData[px][py-1];
+        const pxM1 = roomData[px - 1][py];
+        const pxP1 = roomData[px + 1][py];
+        const pyP1 = roomData[px][py + 1];
+        const pyM1 = roomData[px][py - 1];
 
+        // Roll Encounter Check
+        let result = Encounter(30);
 
-
-        if(event) {
-            this.room[px][py] = this.floor;
+        // If there is no encounter, player is not in combat && there is an event handler...
+        if (!result && event && !this.combat) {
+            this.room[px][py] = <Image inline key={shortU.uuid()} src={Images.floor} width="32" height="32"/>;
 
             console.log("Event: ", event.target.name);
             let dir = event.target.name;
 
 
-            if(dir == "up" && this.collDetect(pxM1)){
+            if (dir == "up" && this.collDetect(pxM1)) {
 
-                this.room[px-1][py] = this.player_avatar;
-                this.setState( { player: { px: px-1, py: py } } );
+                this.room[px - 1][py] = this.player_avatar;
+                this.setState({player: {px: px - 1, py: py}});
             }
 
-            if(dir == "down" && this.collDetect(pxP1)){
+            if (dir == "down" && this.collDetect(pxP1)) {
 
-                this.room[px+1][py] = this.player_avatar;
-                this.setState( { player: { px: px+1, py: py } } );
-            }
-
-
-            if(dir == "left" && this.collDetect(pyM1)) {
-                    this.room[px][py - 1] = this.player_avatar;
-                    this.setState({player: {px: px, py: py - 1}});
-
+                this.room[px + 1][py] = this.player_avatar;
+                this.setState({player: {px: px + 1, py: py}});
             }
 
 
-            if(dir == "right" && this.collDetect(pyP1)){
+            if (dir == "left" && this.collDetect(pyM1)) {
+                this.room[px][py - 1] = this.player_avatar;
+                this.setState({player: {px: px, py: py - 1}});
 
-                this.room[px][py+1] = this.player_avatar;
-                this.setState( { player: { px: px, py: py + 1 } } );
             }
 
 
-            // Check for encounter
-            let result = Encounter(30);
-            if(result && !this.combat) {
-                let mobImage = <Image key={"mob"+shortU.uuid()} src={result.attacker.image} inline/>;
-                if(this.room[px-1][py].props.name != 'wall')
-                    this.room[px-1][py] = mobImage;
-                else if(this.room[px+1][py].props.name !='wall')
-                    this.room[px+1][py] = mobImage;
-                else if(this.room[px][py-1].props.name !='wall')
-                    this.room[px][py-1] = mobImage;
-                else if(this.room[px][py+1].props.name !='wall')
-                    this.room[px][py+1] = mobImage;
+            if (dir == "right" && this.collDetect(pyP1)) {
 
-                this.flashMessage(result.msg);
-                this.combat = true;
-                this.playerCombat()
+                this.room[px][py + 1] = this.player_avatar;
+                this.setState({player: {px: px, py: py + 1}});
             }
-            console.log('Encounter Results: ',result);
+        }
+
+        // Check for encounter
+
+        if (result && !this.combat) {
+            let mobImage = <Image key={"mob" + shortU.uuid()} src={result.attacker.image} inline/>;
+            if (this.room[px - 1][py].props.name != 'wall') {
+                this.room[px - 1][py] = mobImage;
+                this.setState({mobsLoc:{mob: mobImage, loc: [px - 1, py]}});
+            }
+            else if (this.room[px + 1][py].props.name != 'wall') {
+                this.room[px + 1][py] = mobImage;
+                this.setState({mobsLoc:{mob: mobImage, loc: [px + 1, py]}});
+            }
+
+
+            else if (this.room[px][py - 1].props.name != 'wall') {
+                this.room[px][py - 1] = mobImage;
+                this.setState({mobsLoc:{mob: mobImage, loc: [px, py - 1]}});
+
+            }
+
+            else if (this.room[px][py + 1].props.name != 'wall') {
+                this.room[px][py + 1] = mobImage;
+                this.setState({mobsLoc:{mob: mobImage, loc: [px, py + 1]}});
+
+            }
+
+            // flash(result.msg);
+            this.currentMob = result;
+
+            this.combat = true;
+            this.combatMode()
+        }
+        console.log('Encounter Results: ', result);
 
             this.setState({room: this.room});
-            // this.setState( { player: { px: px, py: py } } );
-            // console.log("Player Moved: ",this.state.room);
-            // this.drawPlayerSprite()
-        }
 
     }
 
 
-    playerCombat(){
+    combatMode(){
+        // roll initiative
+       let mobRoll = _.random(1,20);
+       let playerRoll = _.random(1,20)+this.state.dex;
+       let mobNumber = 0;
+       let playNumber = 0;
+       let wonRoll = 0;
+       let damageRoll = 0;
+       let damage = 0;
+       let block = 0;
+       if(!this.state.attacking) {
+           if (mobRoll >= playerRoll) {
+               damageRoll = _.random(1, this.currentMob.attacker.att);
+               block = this.state.def;
+               damage = damageRoll - block;
+               this.state.hp -= damage;
+               wonRoll = this.currentMob.attacker.name;
+               mobNumber = <span style={{
+                   fontSize: "32px",
+                   color: 'red',
+                   backgroundColor: 'white',
+                   display: 'inline'
+               }}>{this.currentMob.attacker.hp}</span>;
+               playNumber =
+                   <span style={{fontSize: "32px", color: 'green', backgroundColor: 'white'}}>{this.state.hp}</span>;
 
-        console.log('Trying to enable buttons.. ',this.props);
-        this.setState({attack:false,defense:false});
-        
 
+           } else {
+               damageRoll = _.random(1, this.state.att);
+               block = this.currentMob.attacker.def;
+               damage = damageRoll - block;
+               this.currentMob.attacker.hp -= damage;
+               wonRoll = 'Player';
+               playNumber = <span style={{
+                   fontSize: "32px",
+                   color: 'red',
+                   backgroundColor: 'white',
+                   display: 'inline'
+               }}>{this.state.hp}</span>;
+               mobNumber = <span style={{
+                   fontSize: "32px",
+                   color: 'green',
+                   backgroundColor: 'white'
+               }}>{this.currentMob.attacker.hp}</span>;
+
+           }
+
+           this.procMessages("red",`${wonRoll} Attacks ${damageRoll} - ${block}: Doing ${damage} points of
+               damage! ${playNumber}  vs  ${mobNumber}`);
+           console.log('Trying to enable buttons.. ', this.props);
+           this.setState({attack: false, defense: false});
+
+       } else {
+           this.playerAttack();
+       }
 
     }
 
@@ -373,19 +540,23 @@ class DungeonMap extends Component{
             <Grid centered>
 
                 <Grid.Row>
+                    <PlayerStatus user={this.props.user.user} att={this.state.att} def={this.state.def} hp={this.state.hp}/>
 
                     <Grid.Column width="8">
 
                         <div style={{border:"2px solid gray",
                                      backgroundColor:"black",
-                                     color:"white",
+                                     color:this.state.flash.color,
                                      padding:"10px",
                                      height:"84px",
                                      fontSize:"18px",
                                      }} >
-                            {this.state.flash}
+                            {this.state.flash.msg}
                         </div>
                     </Grid.Column>
+
+                    <MobStatus creature={ this.currentMob } />
+
                 </Grid.Row>
                 <Grid.Row>
 
@@ -394,9 +565,9 @@ class DungeonMap extends Component{
 
                             Dungeon
                             <div>
-                                <Label>Gems: {this.player.inventory.gems}</Label>
-                                <Label>Silver: {this.player.inventory.silver}</Label>
-                                <Label>Gold: {this.player.inventory.gold}</Label>
+                                <Label>Gems: {this.player.currency.gems}</Label>
+                                <Label>Silver: {this.player.currency.silver}</Label>
+                                <Label>Gold: {this.player.currency.gold}</Label>
                                 {this.showRoom()}
                             </div>
                          <Button name="left" onClick={this.movePlayerSprite}>left</Button>
@@ -452,7 +623,8 @@ class DungeonMap extends Component{
 function mapStateToProps(state){
     return{
         user: state.Auth,
+        flash: state.FlashMessage,
     }
 }
 
-export default connect(mapStateToProps)(DungeonMap);
+export default connect(mapStateToProps, { getMessage, delMessage, addMessage })(DungeonMap);

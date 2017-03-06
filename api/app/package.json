@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon --watch ../app/ --exec babel-node ./bin/www"
+    "start": "nodemon --watch ../app/ --exec babel-node ./bin/www",
+    "dev": "webpack-dev-server --progress --colors --config webpack.config.dev.js"
   },
   "dependencies": {
     "babel-cli": "^6.0.0",

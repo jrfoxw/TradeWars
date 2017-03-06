@@ -6,3 +6,39 @@ block content
   h3 More Testing
   h4 more more testing
   p Welcome to #{title}
+    button.buttonLeft(onclick="moveLeft()") LEFT
+    button.buttonRight(onclick="moveRight()") RIGHT
+    button.buttonReset(onclick="reset()") RESET
+  img(id="timage" src="#")
+
+  script.
+    var socket = io('http://192.168.1.130:3005');
+    var image;
+
+    socket.on('test',function(data){
+        console.log('User Connected: ',data)
+        image = data.data;
+        var c = document.getElementById("timage")
+        c.setAttribute('src',image)
+
+
+
+    });
+
+    socket.emit('test2',{data:5});
+    console.log(socket);
+
+    function moveRight(){
+      console.log("RIGHT");
+      socket.emit('moveRight',{data: "moveRight",dir: 1});
+    }
+
+    function moveLeft(){
+      console.log("LEFT");
+      socket.emit('moveLeft',{data: "moveLeft",dir:-1});
+    }
+
+    function reset(){
+        console.log("RESETTING");
+        socket.emit('reset',{data: 0});
+    }

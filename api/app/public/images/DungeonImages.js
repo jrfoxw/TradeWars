@@ -3,8 +3,8 @@
  */
 
 // Surfaces
-import wall from './wall_corner_32x32.jpg';
-import floor from './pixel_floor2_specked_32x32.jpg';
+import wall from './wallcorner32x32.jpg';
+import floor from './pixelfloor2specked32x32.jpg';
 import hidden from './hidden_square_gray_border_32x32.jpg';
 import remains from './pixel_floor2_bones_32x32.jpg';
 

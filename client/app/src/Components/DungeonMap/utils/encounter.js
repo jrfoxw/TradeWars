@@ -27,6 +27,9 @@ const Encounter = (chance, playerLevel=1, playerMods=1) =>{
             name: "goblin",
             image: CreatureImage.goblin,
             att: 2,
+            toHit:4,
+            def:1,
+            hp: 10,
         },
 
         'rat':
@@ -34,6 +37,9 @@ const Encounter = (chance, playerLevel=1, playerMods=1) =>{
             name:"rat",
             image: CreatureImage.rat,
             att: 1,
+            toHit:2,
+            def:1,
+            hp: 4,
         },
 
         'wolf':
@@ -41,12 +47,18 @@ const Encounter = (chance, playerLevel=1, playerMods=1) =>{
             name:'wolf',
             image: CreatureImage.wolf,
             att: 3,
+            toHit:3,
+            def:1,
+            hp: 15,
         },
         'snake':
         {
             name:'snake',
-            image: CreatureImage.snake,
+            image: CreatureImage.snake2,
             att: 1,
+            toHit:2,
+            def:1,
+            hp: 5,
             special: 'poison'
         }
 
@@ -59,7 +71,7 @@ const Encounter = (chance, playerLevel=1, playerMods=1) =>{
     const roll = _.random(1,99) - playerMods;
     roll >= 100 - chance ?  isEncounter = true: isEncounter = false;
 
-    // If there is an encounter roll for attack and level
+    // If there is an encounter roll for attacker and level
     if(isEncounter){
 
 
@@ -67,15 +79,13 @@ const Encounter = (chance, playerLevel=1, playerMods=1) =>{
         let r = _.random(0,mobs.length);
         let attacker = mobs[r];
 
-        console.log('Attacker',attacker);
+        console.log('Attacker',attacker, r);
         let attacker_level = _.random(1,playerLevel+1);
         let attacker_data = {
                             attacker:creatures[attacker],
                             chance: roll,
                             type:creatures[attacker].name,
                             level:attacker_level,
-                            dice:4,
-                            def:1,
                             msg:`A ${creatures[attacker].name} attacks you!`
                             };
         return attacker_data;
