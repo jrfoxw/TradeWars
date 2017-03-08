@@ -15,41 +15,56 @@ import fs from 'graceful-fs';
 class processAvatar{
     constructor(){
         this.finalImage = "";
+        this.playerNumber = 0;
+        this.imageNumber = 0;
     }
 
-    proccess(avatar, loc, slug){
+    /*
+      avatar = name of avatar with extension
+      loc = location of avatar FOLDER ONLY no trailing '/'
+      slug = Type of Image (Avatar, Wrapper, etc.)
 
-        let avatarFolder = uuidV4();
+    */
+
+    process(avatar, loc, slug){
+
+        let avatarFolder = "player_"+this.playerNumber
         fs.mkdirSync('./public/avatars/'+avatarFolder);
         let pImage = loc+"/"+avatar;
         console.log(avatarFolder, pImage);
+        this.playerNumber +=1
 
         // let fImage = avatar+"_sm.jpg".toString();
         // console.log('Final Image ',fImage);
 
         Jimp.read(pImage).then((image) =>{
-
+            this.imageNumber = 0;
             image.resize(32,32)
                 .quality(80)
-                .write(`./public/avatars/${avatarFolder}/${slug}_${avatar}_sm.jpg`);
+                .write(`./public/avatars/${avatarFolder}/${slug}_${this.imageNumber=0}_${avatar}_sm.jpg`);
 
         }).catch((err) =>{
             console.log("Error ",err);
         });
 
+
         Jimp.read(pImage,(err, image) =>{
             if(err) throw err;
             image.resize(64,64)
                 .quality(80)
-                .write(`./public/avatars/${avatarFolder}/${slug}_${avatar}_md.jpg`);
+                .write(`./public/avatars/${avatarFolder}/${slug}_${this.imageNumber+=1}_${avatar}_md.jpg`);
         });
+        this.imageNumber +=1
 
         Jimp.read(pImage,(err, image) =>{
             if(err) throw err;
             image.resize(128,128)
                 .quality(80)
-                .write(`./public/avatars/${avatarFolder}/${slug}_${avatar}_lg.jpg`);
+                .write(`./public/avatars/${avatarFolder}/${slug}_${this.imageNumber+=1}_${avatar}_lg.jpg`);
+
+
         });
+
 
         console.log('Conversion complete..')
     };
@@ -59,5 +74,3 @@ class processAvatar{
 }
 
 export default processAvatar;
-
-

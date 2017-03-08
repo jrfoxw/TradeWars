@@ -8,6 +8,7 @@ import http from 'http'
 import socketIO from 'socket.io' ;
 import cors from 'cors' ;
 import Canvas from 'canvas';
+import Logger from 'color-logger'
 import 'node-easel';
 
 
@@ -26,20 +27,33 @@ import pAvatar from './utils/processAvatar';
 
 let newMap = new DrawMap;
 
-let room = newMap.createPreBuiltRoom();
-newMap.buildRoom(room);
 
-
-
-
-
-
+import sock from './utils/makeSocket'
+sock();
 const app = express();
 
-// import makeSocket from './utils/makeSocket';
-//
-// let sock = new makeSocket;
-// sock.init();
+
+// let avatar = new pAvatar;
+// avatar.process('Elven_Ranger_SM.jpg','./public/images','_AVATAR_')
+// avatar.process('Halfling_Rogue_SM.jpg','./public/images','_AVATAR_')
+// avatar.process('Human_Valkryie_SM.jpg','./public/images','_AVATAR_')
+// avatar.process('Dwarven_Warrior_SM.jpg','./public/images','_AVATAR_')
+
+
+// let room = newMap.createPreBuiltRoom();
+// Logger.v("Room from App: ",room.length);
+// newMap.buildRoom(room);
+
+
+
+
+
+
+
+
+
+
+
 
 // const server = http.createServer(app);
 // const io = socketIO(server);
@@ -100,7 +114,7 @@ app.use((err, req, res, next) => {
 });
 
 // let v = new pAvatar;
-// v.proccess('Dwarven_Warrior_SM.jpg','./public/images',"_AVATAR_");
+// v.proccess('Dwarven_Warrior_SM.jpg','./public/images',"_AVATAR_")
 
 
 module.exports = app;
