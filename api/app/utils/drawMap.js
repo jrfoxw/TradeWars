@@ -31,8 +31,16 @@ class DrawMap{
             // this.player.src = fs.readFileSync('./public/images/_AVATAR__sm.jpg');
             this.doorR = new Image();
             this.doorR.src = fs.readFileSync('./public/images/surfaces/door_r_32x32.png');
+            this.doorL = new Image();
+            this.doorL.src = fs.readFileSync('./public/images/surfaces/door_l_32x32.png');
+            this.doorN = new Image();
+            this.doorN.src = fs.readFileSync('./public/images/surfaces/door_t_32x32.png');
+            this.doorS = new Image();
+            this.doorS.src = fs.readFileSync('./public/images/surfaces/door_b_32x32.png');
             this.hidden = new Image();
             this.hidden.src = fs.readFileSync('./public/images/surfaces/hidden_square_32x32.jpg');
+            this.gold_coin = new Image();
+            this.gold_coin.src = fs.readFileSync('./public/images/items/coin_gold_32x32.png');
 
 
             this.sizexy = 0;
@@ -43,18 +51,11 @@ class DrawMap{
             this.cols = 0;
             this.playerLoc = [0,0];
             this.pData = [2,2];
+            this.roomObjectsCoords = [];
 
 
             this.playerFolder = './players/_'+moment().format("MMYY")+'/';
             this.mapFolder = './public/images/map/';
-            // this.player_100 ={img:"",src:""};
-            // this.player_101 ={img:"",src:""};
-            // this.player_102 ={img:"",src:""};
-            // this.player_103 ={img:"",src:""} ;
-            // this.playerArray = [this.player_100,
-            //                     this.player_101,
-            //                     this.player_102,
-            //                     this.player_103]
 
 
         }
@@ -74,30 +75,32 @@ class DrawMap{
    // For testing/Debug
    createPreBuiltRoom(){
 
-        let room = [
-               [1,1,1,1,1,1,1,1,1,0,1],
-               [1,1,1,99,1,1,1,1,1,99,1],
-               [1,0,1,1,1,1,0,1,1,0,1],
-               [1,0,0,0,0,0,0,1,1,0,1],
-               [1,0,0,0,0,0,0,1,1,0,1,1],
-                 [1,0,0,0,0,0,0,0,0,0,2],
-                 [1,0,99,0,0,0,1,1,1,1,1],
-                 [1,0,0,0,0,0,1],
-                 [1,0,0,0,0,0,1],
-                 [1,0,0,0,0,0,1]
+        let room1 = [
+
+             [1,1,1,1,1,1,1,1,1,0,1],
+             [1,1,1,99,1,1,1,1,1,99,1],
+             [1,0,1,1,1,1,0,1,1,0,1],
+             [1,0,0,0,0,0,0,1,1,0,1],
+             [1,0,0,0,0,0,0,1,1,0,1,1],
+             [1,0,0,0,0,0,0,0,0,0,2],
+             [1,0,99,0,0,0,1,1,1,1,1],
+             [1,0,0,0,0,0,1],
+             [1,0,0,0,0,0,1],
+             [1,0,0,0,0,0,1]
         ];
 
-       let room2 = [
-           [1,1,1,1,1,1,1,1,1,0,1],
-           [1,1,1,99,1,1,1,1,1,99,1],
-           [1,0,1,1,1,1,0,1,1,0,1],
-           [1,0,0,0,0,0,0,1,1,0,1],
-           [1,0,0,0,0,0,0,1,1,0,1,1],
-           [2,0,0,0,0,0,0,0,0,0,2],
-           [1,0,99,0,0,0,1,1,1,1,1],
-           [1,0,0,0,0,0,1],
-           [1,0,0,0,0,0,1],
-           [1,0,0,0,0,0,1]
+       let room = [
+
+               [1,99,99,99,99,99,99,1],
+               [1,99,99,99,99,99,99,1],
+               [1,1,1,1,1,1,1,1,1,1],
+               [1,0,0,0,0,0,0,1,1,1],
+               [1,0,0,0,0,0,0,1,1,1],
+               [4,0,0,0,0,0,0,0,0,1],
+               [1,0,0,0,0,0,1,1,1,1],
+               [1,1,0,0,0,0,1],
+               [99,99,1,0,0,0,1],
+               [99,99,99,1,3,1,1]
        ];
 
 
@@ -200,12 +203,15 @@ class DrawMap{
        */
 
 
-       const setImage = (image) => {
+       const setImage = (image,src="",gridLoc=[0,0]) => {
 
 
            this.bitmap = new createjs.Bitmap(image);
            this.bitmap.x = this.sizeGridX;
            this.bitmap.y = this.sizeGridY;
+
+           this.roomObjectsCoords.push({posX:this.bitmap.x,posY:this.bitmap.y,tile:src,gridLoc:gridLoc});
+
 
            stage.addChild(this.bitmap);
            this.sizeGridX += this.spacer;
@@ -248,16 +254,22 @@ class DrawMap{
            _.forEach((value), (ivalue, ikey) => {
                switch (ivalue) {
                    case 0:
-                       this.bitmap = setImage(this.floor);
-                       // this.sizeGridX += this.spacer;
+                       this.bitmap = setImage(this.floor,"floor",[key,ikey]);
                        break;
                    case 1:
-                       this.bitmap = setImage(this.wall);
-                       // this.sizeGridX += this.spacer;
+                       this.bitmap = setImage(this.wall,"wall",[key,ikey]);
                        break;
                    case 2:
-                       this.bitmap = setImage(this.doorR);
-                       // this.sizeGridX += this.spacer;
+                       this.bitmap = setImage(this.doorR,"door right",[key,ikey]);
+                       break;
+                   case 3:
+                       this.bitmap = setImage(this.doorS,"door south",[key,ikey]);
+                       break;
+                   case 4:
+                       this.bitmap = setImage(this.doorL,"door left",[key,ikey]);
+                       break;
+                   case 20:
+                       this.bitmap = setImage(this.gold_coin,"gold coin",[key,ikey]);
                        break;
                    case 100:
 
@@ -268,12 +280,10 @@ class DrawMap{
                                Logger.i('Player Avatar 100: ',value.player.avatar);
                                let player_100 = new Image();
                                player_100.src = value.player.avatar;
-                               this.bitmap = setImage(player_100);
+                               this.bitmap = setImage(player_100,player_100.src,[key,ikey]);
 
                            }
                         });
-
-                       // this.sizeGridX += this.spacer;
                        break;
                    case 101:
 
@@ -282,7 +292,7 @@ class DrawMap{
                            Logger.i('Player ID Value: ',value);
                            if (value.player.number === 101) {
                                player_101.src = value.player.avatar;
-                               this.bitmap = setImage(player_101);
+                               this.bitmap = setImage(player_101,player_101.src,[key,ikey]);
 
                            }
                        });
@@ -294,11 +304,11 @@ class DrawMap{
                            Logger.i('Player ID Value: ',value);
                            if (value.player.number === 102) {
                                player_102.src = value.player.avatar;
-                               this.bitmap = setImage(player_102);
+                               this.bitmap = setImage(player_102,player_102.src,[key,ikey]);
 
                            }
                        });
-                       // this.sizeGridX += this.spacer;
+
                        break;
                    case 103:
 
@@ -307,27 +317,38 @@ class DrawMap{
                            Logger.i('Player ID Value: ',value);
                            if (value.player.number === 103) {
                                player_103.src = value.player.avatar;
-                               this.bitmap = setImage(player_103);
+                               this.bitmap = setImage(player_103,player_103.src,[key,ikey]);
 
                            }
                        });
                        break;
                    case 99:
-                       this.bitmap = setImage(this.hidden);
-                       // this.sizeGridX += this.spacer;
+                       this.bitmap = setImage(this.hidden,'empty square',[key,ikey]);
                        break;
                    default:
                        Logger.e('Error with image placement..',ivalue);
                        break;
                }
+
+
            });
 
            this.sizeGridY += this.spacer;
            this.sizeGridX = this.spacer;
+
+           // this.bitmap = setImage(this.gold_coin);
+
        });
 
 
 
+       this.bitmap = new createjs.Bitmap(this.gold_coin);
+       this.bitmap.x = 66;
+       this.bitmap.y = 230;
+       this.roomObjectsCoords.push({posX:this.bitmap.x,posY:this.bitmap.y,tile:"coin",gridLoc:[0,0]});
+       stage.addChild(this.bitmap);
+
+       Logger.w('Room Objects: ',this.roomObjectsCoords);
 
        stage.addChild(square);
        stage.update();
