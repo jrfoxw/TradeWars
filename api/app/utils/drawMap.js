@@ -47,14 +47,14 @@ class DrawMap{
 
             this.playerFolder = './players/_'+moment().format("MMYY")+'/';
             this.mapFolder = './public/images/map/';
-            this.player_100 ={img:"",src:""};
-            this.player_101 ={img:"",src:""};
-            this.player_102 ={img:"",src:""};
-            this.player_103 ={img:"",src:""} ;
-            this.playerArray = [this.player_100,
-                                this.player_101,
-                                this.player_102,
-                                this.player_103]
+            // this.player_100 ={img:"",src:""};
+            // this.player_101 ={img:"",src:""};
+            // this.player_102 ={img:"",src:""};
+            // this.player_103 ={img:"",src:""} ;
+            // this.playerArray = [this.player_100,
+            //                     this.player_101,
+            //                     this.player_102,
+            //                     this.player_103]
 
 
         }
@@ -86,6 +86,21 @@ class DrawMap{
                  [1,0,0,0,0,0,1],
                  [1,0,0,0,0,0,1]
         ];
+
+       let room2 = [
+           [1,1,1,1,1,1,1,1,1,0,1],
+           [1,1,1,99,1,1,1,1,1,99,1],
+           [1,0,1,1,1,1,0,1,1,0,1],
+           [1,0,0,0,0,0,0,1,1,0,1],
+           [1,0,0,0,0,0,0,1,1,0,1,1],
+           [2,0,0,0,0,0,0,0,0,0,2],
+           [1,0,99,0,0,0,1,1,1,1,1],
+           [1,0,0,0,0,0,1],
+           [1,0,0,0,0,0,1],
+           [1,0,0,0,0,0,1]
+       ];
+
+
         let rows = room[0].length;
         let cols = room.length;
         this.playerLoc = [Math.round(cols/2), Math.round(rows/2)];
@@ -218,7 +233,7 @@ class DrawMap{
 
 
           });
-          console.log('SOME PLAYER DATA: ',playerInfo)
+          // console.log('SOME PLAYER DATA: ',playerInfo)
 
        });
 
@@ -245,10 +260,13 @@ class DrawMap{
                        // this.sizeGridX += this.spacer;
                        break;
                    case 100:
-                       let player_100 = new Image();
-                       _.forEach(roomData.playerIds, (value, key) =>{
-                           Logger.i('Player ID Value: ',value);
+
+                       _.forEach(roomData.playersIDs.playerIds, (value, key) =>{
+                           Logger.i('Player ID Value: ',value, key);
+                           Logger.i('Number: ',value.player.number);
                            if(value.player.number === 100) {
+                               Logger.i('Player Avatar 100: ',value.player.avatar);
+                               let player_100 = new Image();
                                player_100.src = value.player.avatar;
                                this.bitmap = setImage(player_100);
 
@@ -258,8 +276,9 @@ class DrawMap{
                        // this.sizeGridX += this.spacer;
                        break;
                    case 101:
-                       let player_101 = new Image();
-                       _.forEach(roomData.playerIds, (value, key) => {
+
+                       _.forEach(roomData.playersIDs.playerIds, (value, key) => {
+                           let player_101 = new Image();
                            Logger.i('Player ID Value: ',value);
                            if (value.player.number === 101) {
                                player_101.src = value.player.avatar;
@@ -267,7 +286,31 @@ class DrawMap{
 
                            }
                        });
+                       break;
+                   case 102:
+
+                       _.forEach(roomData.playersIDs.playerIds, (value, key) => {
+                           let player_102 = new Image();
+                           Logger.i('Player ID Value: ',value);
+                           if (value.player.number === 102) {
+                               player_102.src = value.player.avatar;
+                               this.bitmap = setImage(player_102);
+
+                           }
+                       });
                        // this.sizeGridX += this.spacer;
+                       break;
+                   case 103:
+
+                       _.forEach(roomData.playersIDs.playerIds, (value, key) => {
+                           let player_103 = new Image();
+                           Logger.i('Player ID Value: ',value);
+                           if (value.player.number === 103) {
+                               player_103.src = value.player.avatar;
+                               this.bitmap = setImage(player_103);
+
+                           }
+                       });
                        break;
                    case 99:
                        this.bitmap = setImage(this.hidden);

@@ -13,6 +13,9 @@ block content
       td User
       td#id
     tr
+      td Name
+      td#user
+    tr
       td Location
       td#location
 
@@ -37,22 +40,26 @@ block content
     var up = document.getElementById("update");
     var id = document.getElementById("id");
     var loc = document.getElementById("location");
+    var puser = document.getElementById("user");
     var holder = document.getElementById("timageHolder");
 
     socket.on('loop',function(data){
-        console.log('User Connected: ',data)
+        console.log('User Connected: ',data.roomData)
+        console.log('Socket ',socket);
         // image = data.data;
         var img = new Image();
-        // c.setAttribute('src',"#");
-        // c.setAttribute('src',image);
         img.src = 'data:image/jpeg;base64,' + data.data;
-        // var stringLoc = new TextDecoder
-        // var arr = stringLoc.decode(data.loc);
         ctx.drawImage(img,0,0);
+
         if(data != undefined || data != null){
           up.innerHTML = "Connected ";
           id.innerHTML = ""+socket.id;
           loc.innerHTML = [data.roomData.playerLoc.posX, data.roomData.playerLoc.posY];
+          if(data.roomData.playerData.id == socket.id) {
+              var userName = data.roomData.playerData.name;
+              puser.innerHTML = "" + userName;
+              console.log("Name: ", userName);
+          }
       }else{
         up.innerHTML = "Server Down..";
       }

@@ -81,10 +81,13 @@ import filehound from 'filehound';
             });
 
             playerInfo.playerData = {
+                id:socket.id,
                 number:playerNum,
                 name:"Bob_"+_.random(1000,100000),
                 spawn: spawn[spawnPoint]
             };
+
+
             playerInfo.player.loc.posX = spawn[spawnPoint][0];
             playerInfo.player.loc.posY = spawn[spawnPoint][1];
 
@@ -102,7 +105,7 @@ import filehound from 'filehound';
                 // }).catch((error) =>{ Logger.e('Something went wrong..',error) });
 
             // Limit to 4 players...
-            playerNum > 104 ? playerNum = 100: playerNum+=1;
+            playerNum > 103 ? playerNum = 100: playerNum+=1;
 
 
             // Write socket.id_.JSON to players folder
@@ -116,6 +119,7 @@ import filehound from 'filehound';
             // Add all players ids to (sockets) to roomData.
             // build room..
             roomData.playersIDs = {playerIds};
+
             newMap.buildRoom(roomData);
             console.log('RD: ',roomData);
 
@@ -126,6 +130,8 @@ import filehound from 'filehound';
                 console.log(data)
             });
 
+
+
             /**
             MOVE PLAYER
             **/
@@ -133,6 +139,9 @@ import filehound from 'filehound';
               newMap = new DrawMap;
               roomData = newMap.createPreBuiltRoom();
               Logger.i('Room Data: ',roomData);
+
+
+
 
               // Redundant check for players folder
               if(fs.existsSync(playerFolder+socket.id+'_.json')){
@@ -205,23 +214,28 @@ import filehound from 'filehound';
             if(socket.status && playerIds !== []){
                 console.log('Socket Status: ',socket.status);
                 console.log('PlayerIds Length in Loop ',playerIds.length);
+
                 let loop = setInterval(() => {
                     if(playerIds.length === 0)
                         clearInterval(loop);
                     let newMap = new DrawMap;
                     let roomData = newMap.createPreBuiltRoom();
+
                     roomData.playersIDs = {playerIds};
+                    roomData.playerData = playerInfo.playerData;
+
                     // Logger.w('Socket Room Data: ',roomData.room[0])
                     newMap.buildRoom(roomData);
 
                     // jsonfile.readFile('./public/images/data.json', 'utf8', function(err, playerData){
                     fs.readFile('./public/images/map/game_map.png', function (err, buf) {
+                        socket.playerName = playerInfo.playerData.name;
                         socket.emit('loop', {data: buf.toString('base64'), roomData});
 
 
                     });
 
-                }, 200);
+                }, 500);
             }else{
                 clearInterval(loop)
             }
