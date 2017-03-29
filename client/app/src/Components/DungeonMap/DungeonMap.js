@@ -9,6 +9,10 @@ import { addMessage, getMessage, delMessage } from '../../Actions/flashActions'
 import PlayerStatus from './PlayerStatus';
 import MobStatus from './MobStatus';
 import Encounter from './utils/encounter';
+import axios from 'axios';
+import io from 'socket.io-client';
+
+let socket = io('http://192.168.1.130:3005');
 
 
 
@@ -16,7 +20,9 @@ class DungeonMap extends Component{
     constructor(props){
         super(props);
         this.state = {
+                        currentRoom:null,
                         room:[],
+                        room64:null,
                         pos:0,
                         player:{px:5,py:5},
                         flash:{color:"white",msg:"Click a direction to begin.."},
@@ -71,23 +77,89 @@ class DungeonMap extends Component{
         this.playerInventory = this.playerInventory.bind(this);
 
 
+
         this.messageHistory = [];
+
+
+        // this.dungeonImage = new Image();
 
     }
 
 
     componentWillMount(){
         this.setState({ isLoading: false });
+        this.set_room();
 
     }
 
     componentDidMount(){
         console.log('Flash: ',this.props.flash.message);
+        socket.emit('connection',{data: "buzz"})
+
+        socket.on('connection',(data) =>{
+          console.debug('Connected to Server..')
+        })
+        socket.on('move' ,(data) =>{
+          console.debug('Data recieved from server.. ',data.data)
+          this.setState({currentRoom:null})
+          this.setState({currentRoom:data.data})
+
+          // this.showTestRoom()
+        })
         this.create_room_raw();
+
 
         // this.drawPlayerSprite(Math.round(this.gridx/2), Math.round(this.gridy/2));
         this.showRoom();
     }
+
+
+    get_room(){
+      axios.get("http://192.168.1.130:3001/api/dungeon/")
+      .then((res) =>{
+        console.debug('Recieved image data..',res)
+        this.setState({room64: res})
+      })
+      .catch((err) =>{
+        console.debug('No data recieved..')
+      })
+    }
+
+
+
+    set_room(){
+      this.setState({currentRoom:"http://192.168.1.130:3001/gamefiles/map/dungeon/game_map.png"})
+    }
+
+    moveRight(){
+
+      console.log("RIGHT");
+      socket.emit('move',{
+        msg: "Moving "+socket.id+" Right",
+        dir: [0,+1],
+        id:socket.id,
+
+      });
+
+
+
+
+      // createjs.Sound.play(audioPath+'stepSound.mp3')
+    }
+
+    moveLeft(){
+
+      console.log("RIGHT");
+      socket.emit('move',{
+        msg: "Moving "+socket.id+" Right",
+        dir: [0,-1],
+        id:socket.id,
+      });
+
+
+      // createjs.Sound.play(audioPath+'stepSound.mp3')
+    }
+
 
 
 
@@ -501,6 +573,15 @@ class DungeonMap extends Component{
         return this.room.map((value, key) => <div key={key}>{value}</div>)
     }
 
+    showTestRoom(){
+
+
+
+      // this.dungeonImage.src = 'data:image/png;base64,'+this.state.room64
+      // console.log('Room64: ',this.dungeonImage.src)
+      return (<div><img alt='test' src={this.state.currentRoom}/></div>)
+    }
+
 
     LoaderWait(){
 
@@ -524,9 +605,9 @@ class DungeonMap extends Component{
         if(isLoading) {
             return (
                 <Grid centered>
-                    <Grid.Row>
-                        <Grid.Column width={8}>
-                            <div style={{ backgroundColor:"black",height:"400px",width:"400px" }}>
+                  <Grid.Row>
+                    <Grid.Column width={8}>
+                      <div style={{ backgroundColor:"black",height:"400px",width:"400px" }}>
                             {this.LoaderWait()}
                             </div>
                         </Grid.Column>
@@ -539,39 +620,40 @@ class DungeonMap extends Component{
 
             <Grid centered>
 
-                <Grid.Row>
-                    <PlayerStatus user={this.props.user.user} att={this.state.att} def={this.state.def} hp={this.state.hp}/>
+              <Grid.Row>
+                <PlayerStatus user={this.props.user.user} att={this.state.att} def={this.state.def} hp={this.state.hp}/>
 
-                    <Grid.Column width="8">
+                <Grid.Column width="8">
 
-                        <div style={{border:"2px solid gray",
+                  <div style={{border:"2px solid gray",
                                      backgroundColor:"black",
                                      color:this.state.flash.color,
                                      padding:"10px",
                                      height:"84px",
                                      fontSize:"18px",
-                                     }} >
-                            {this.state.flash.msg}
-                        </div>
-                    </Grid.Column>
+                  }} >
+                    {this.state.flash.msg}
+                  </div>
+                </Grid.Column>
 
-                    <MobStatus creature={ this.currentMob } />
+                <MobStatus creature={ this.currentMob } />
 
-                </Grid.Row>
-                <Grid.Row>
+              </Grid.Row>
+              <Grid.Row>
 
-                    <Grid.Column width={6} offset={2} color="black">
-                        <Container>
+                <Grid.Column width={6} offset={2} color="black">
+                  <Container>
 
-                            Dungeon
-                            <div>
-                                <Label>Gems: {this.player.currency.gems}</Label>
-                                <Label>Silver: {this.player.currency.silver}</Label>
-                                <Label>Gold: {this.player.currency.gold}</Label>
-                                {this.showRoom()}
-                            </div>
-                         <Button name="left" onClick={this.movePlayerSprite}>left</Button>
-                         <Button name="right" onClick={this.movePlayerSprite}>Right</Button>
+                    Dungeon
+                    <div>
+                      <Label>Gems: {this.player.currency.gems}</Label>
+                      <Label>Silver: {this.player.currency.silver}</Label>
+                      <Label>Gold: {this.player.currency.gold}</Label>
+                      {/* {this.showRoom()} */}
+                      {this.showTestRoom()}
+                    </div>
+                    <Button name="left" onClick={this.moveLeft}>left</Button>
+                    <Button name="right" onClick={this.moveRight}>Right</Button>
                          <Button name="up" onClick={this.movePlayerSprite}>up</Button>
                          <Button name="down" onClick={this.movePlayerSprite}>down</Button>
 

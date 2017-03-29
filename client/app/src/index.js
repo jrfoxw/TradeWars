@@ -15,6 +15,8 @@ import Create from './Containers/Create';
 import QCreator from './Components/QuestCreator';
 import QSelect from './Components/QuestCreator';
 import DungeonMap from './Components/DungeonMap';
+import SocketTest from './Components/SocketTest';
+import Audio from './Components/Audio';
 
 
 import store from './store';
@@ -28,28 +30,31 @@ const app = document.getElementById('root');
 
 ReactDOM.render(
  <Provider store={store}>
-     <Router history={browserHistory}>
-         <Route path="/" component={App}>
-             <Route path="/home" component={Home} />
-            <Route path="/login" component={Login}/>
-            <Route path="/login/:title" component={Login}/>
-             <Route path="/signup" component={SignUp}/>
-            <Route path="/signup/:title" component={SignUp}/>
+   <Router history={browserHistory}>
+     <Route path="/" component={App}>
+       <Route path="/home" component={Home} />
+       <Route path="/login" component={Login}/>
+       <Route path="/login/:title" component={Login}/>
+       <Route path="/signup" component={SignUp}/>
+       <Route path="/signup/:title" component={SignUp}/>
 
-         <Route path="/roller" component={Roller}/>
+       <Route path="/roller" component={Roller}/>
 
-         <Route path="/quest" component={Quest}/>
-         <Route path="/qselect" component={QSelect}/>
-         <Route path="/qcreator" component={QCreator}/>
+       <Route path="/quest" component={Quest}/>
+       <Route path="/qselect" component={QSelect}/>
+       <Route path="/qcreator" component={QCreator}/>
 
-         <Route path="/players" component={Players}/>
-         <Route path="/create" component={Create}/>
+       <Route path="/players" component={Players}/>
+       <Route path="/create" component={Create}/>
 
-         <Route path="/dungeon" component={DungeonMap}/>
+       <Route path="/dungeon" component={DungeonMap}/>
+       <Route path="/socket" component={SocketTest}/>
+       <Route path="/audio" component={Audio}/>
 
-         </Route>
-     </Router>
- </Provider>,
+
+     </Route>
+         </Router>
+         </Provider>,
     app
 
 );
