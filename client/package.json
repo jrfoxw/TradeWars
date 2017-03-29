@@ -1,11 +1,41 @@
 {
-  "name": "web",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "react-scripts": "0.8.5",
+    "semantic-ui": "^2.2.7"
   },
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "axios": "^0.15.3",
+    "classnames": "^2.2.5",
+    "createjs-soundjs": "^0.6.2",
+    "extension": "^0.2.0",
+    "howler": "^2.0.3",
+    "jwt-decode": "^2.1.0",
+    "konva": "^1.5.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.17.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-howler": "^3.5.0",
+    "react-konva": "^1.1.1",
+    "react-redux": "^5.0.2",
+    "react-router": "^3.0.2",
+    "redux": "^3.6.0",
+    "redux-devtools": "^3.3.2",
+    "redux-devtools-extension": "^2.13.0",
+    "redux-thunk": "^2.2.0",
+    "semantic-ui-css": "^2.2.4",
+    "semantic-ui-react": "^0.64.7",
+    "short-uuid": "^2.2.0",
+    "socket.io-client": "^1.7.3",
+    "soundmanager2": "^2.97.20150601-a"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
 }
