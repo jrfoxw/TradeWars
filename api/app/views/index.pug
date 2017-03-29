@@ -1,74 +1,324 @@
 extends layout
 
 block content
-  h1= title
-  h2 Test
-  h3 More Testing
-  h4 more more testing
-  table(style="border: 2px solid #494")
-    tr
-      td Status
-      td(style="color:red; font-weight: 900px;")#update
-    tr
-      td User
-      td#id
-    tr
-      td Name
-      td#user
-    tr
-      td Location
-      td#location
+  div
 
-  p Welcome to #{title}
-    button.buttonLeft(onclick="moveLeft()") LEFT
-    button.buttonRight(onclick="moveRight()") RIGHT
-    button.buttonRight(onclick="moveUp()") UP
-    button.buttonRight(onclick="moveDown()") DOWN
+  h1 "Dungeon Romper v0.21 Dashboard v0.05"
+  h2 Player Data
+  div#chatStream
+    // span
+    //   i server ::
+    // span#update
+    // span#id "socket" ::
+    // span#location
+  div#chatBar
+    form(action="#" onsubmit="getMsg(event)")
+      input#chat
+  div#setHp
+    form(action="#" onsubmit="setHp(event)")
+      label HP CHANGE
+        input#hpvalue
+  dev#setName
+    form(action="#" onsubmit="setName(event)")
+      label NAME CHANGE
+        input#namevalue
 
-    button.buttonReset(onclick="reset()") RESET
+  div#timageHolder
+    div#statsWrap
+      canvas#canvas(width='500', height='600')
+      div#playerStats
 
-    div#timageHolder
-      canvas#canvas(width='600', height='600' style='border:3px solid #000;')
+        div#location
+
+        div#gold
+          div#s_Label GOLD
+          div#gpdisplay
+
+        div#xp
+          div#s_Label XP
+          div#xpdisplay
+        hr
+
+        div#hpbox
+          div#s_Label BODY
+          div#hpdisplay
+
+        div#mpbox
+          div#s_Label SOUL
+          div#mpdisplay
+
+        div#att
+          div#s_Label ATT
+          div#attdisplay
+
+        div#def
+          div#s_Label DEF
+          div#defdisplay
+
+        Inventory
+        hr
+        table#inventory
+          tr
+            td LEFT
+            td#weapon
+            td#attdisplay
+          tr
+            td RIGHT
+            td#armor
+            td#defdisplay
+
+
+
+    div#buttonRack Controls
+      button.buttonLeft(onclick="moveLeft()") LEFT
+      button.buttonRight(onclick="moveRight()") RIGHT
+      button.buttonRight(onclick="moveUp()") UP
+      button.buttonRight(onclick="moveDown()") DOWN
+
+      button.playSound(onclick="playSound()") SOUND TEST
+
+
+  label Room#
+    input#room(
+      type='text'
+      name="roomNumber")
+    button.send(onclick="retrieveRoomData()") SEND
+
+    div#mapImageHolder
+      canvas#map(width='450', height='450')
+      button.buttonZoomIn(onclick="zoomIn()") +
+      button.buttonZoomOut(onclick="zoomOut()") -
+
 
 
 
   script.
-    var socket = io('http://192.168.1.130:3006');
+    var socket = io('http://192.168.1.130:3005');
     var image;
     var c = document.getElementById("timage");
+    var canvas = document.getElementById("canvas");
+    var map = document.getElementById("map")
     var ctx = document.getElementById('canvas').getContext("2d");
+    var ctx2 = document.getElementById('map').getContext("2d");
+
+    // Server info Status
     var up = document.getElementById("update");
     var id = document.getElementById("id");
     var loc = document.getElementById("location");
     var puser = document.getElementById("user");
+
+    // chat
+    var chatStream = document.getElementById("chatStream")
+    var chat = document.getElementById("chat")
+    var messages = ["<div class='serverStatus'> Server:: Connected </div> ",
+                    "<div> User: "+socket.id+"</div>"]
+    // player info
+    var hp = document.getElementById("hpdisplay");
+    var mp = document.getElementById("mpdisplay");
+    var att = document.getElementById("attdisplay");
+    var def = document.getElementById("defdisplay");
+    var xp = document.getElementById("xpdisplay");
+    var gp = document.getElementById("gpdisplay");
+    var wp = document.getElementById('weapon');
+    var ar = document.getElementById('armor');
+
+    this.player = null;
+
+
+
+
+
+
+
+
     var holder = document.getElementById("timageHolder");
+    var mapHolder = document.getElementById("mapImageHolder");
+    var zoomLevels = ["map_0.6","map_0.7","map_0.8","map_0.9"];
+    var zoom = 0;
+
+
+
+    var room = document.getElementById("room");
+
+
+    var audioPath = './public/sounds/';
+    var sounds = {
+        bite:{id: "bite", src: "thing_bite.wav"},
+        deflect:{id: "deflect", src: "deflect.mp3"},
+        step:{id:"step",src:"stepSound.mp3"}
+    }
+
+
+
+
+
+
+    socket.on('connection', function(data){
+      console.log('User Connected: ',data)
+      console.log('Socket ',socket);
+      createjs.Sound.play('enter_chat')
+      setMsg();
+      testHeart();
+
+    });
+
+    socket.on('disconnect', function(){
+      creatjs.Sound.play('exit_chat')
+      setMsg();
+    })
 
     socket.on('loop',function(data){
-        console.log('User Connected: ',data.roomData)
-        console.log('Socket ',socket);
+
         // image = data.data;
-        var img = new Image();
-        img.src = 'data:image/jpeg;base64,' + data.data;
-        ctx.drawImage(img,0,0);
+        var room = new Image();
+        room.src = 'data:image/jpeg;base64,' + data.room;
+        ctx.drawImage(room,0,0);
+        var smap = new Image();
+        smap.src = 'data:image/jpeg;base64,' + data.map[zoomLevels[zoom]];
+        ctx2.clearRect(0,0, smap.width, smap.height);
+        ctx2.drawImage(smap,5,5);
+
 
         if(data != undefined || data != null){
-          up.innerHTML = "Connected ";
-          id.innerHTML = ""+socket.id;
-          loc.innerHTML = [data.roomData.playerLoc.posX, data.roomData.playerLoc.posY];
-          if(data.roomData.playerData.id == socket.id) {
-              var userName = data.roomData.playerData.name;
-              puser.innerHTML = "" + userName;
-              console.log("Name: ", userName);
-          }
+
+          // chatStream.innerHTML += "<div> Currently at: </div><span id='location'></span>"
+
+          // loc.innerHTML = [data.roomData.playerLoc.posX, data.roomData.playerLoc.posY];
+          // if(data.roomData.playerData.id == socket.id) {
+          //     var userName = data.roomData.playerData.name;
+          //     puser.innerHTML = "" + userName;
+          //     console.log("Name: ", userName);
+          // }
       }else{
-        up.innerHTML = "Server Down..";
+        up.innerHTML = "<span style='color:red'> Offline </span>";
       }
 
 
     });
 
+    function testHeart(){
+      let heartbeat_ppc = new createjs.PlayPropsConfig().set({delay:1500})
+      let heart = this.player.stats.hp/5 * 1000
+
+      console.debug('Heart Rate == ',heart)
+      console.debug('Seconds == ', 5000 - heart)
+
+      setInterval(function(){
+        let heartbeat = createjs.Sound.play('heartbeat', heartbeat_ppc)
+        console.debug('Pausing heartbeat..')
+        heartbeat.on("complete", heartPause);
+        function heartPause(event){
+          heartbeat.paused = false;
+
+        }
+      }, 5000);
+
+    }
+
+
+
+    socket.on('playerInfo', function(data){
+      console.log('Recieved Player Info.. ',data)
+      this.player = data.player
+      var player = data.player;
+      hp.style.width = player.stats.hp+"px"
+      mp.style.width = player.stats.mag+"px"
+      xp.innerHTML = player.stats.xp
+      att.innerHTML = player.stats.att
+      def.innerHTML = player.stats.def
+      gp.innerHTML = player.gold
+      wp.innerHTML = player.backpack.weapons
+      ar.innerHTML = player.backpack.armor
+
+      if(player.socket == socket.id) {
+        loc.innerHTML = " [ "+[player.located.posX, player.located.posY]+" ] hp: "+player.stats.hp;
+        /*puser.innerHTML = player.name;*/
+        hp.style.width = player.stats.hp+"px"
+        if(player.stats.hp < 25){
+          // createjs.Sound.stop(audioPath+'heartbeat.wav')
+
+
+        }
+        mp.style.width = player.stats.mag+"px"
+        xp.innerHTML = player.stats.xp
+        att.innerHTML = player.stats.att
+        def.innerHTML = player.stats.def
+        gp.innerHTML = player.gold
+      }
+    })
+
+    socket.on('hit wall', function(data){
+      createjs.Sound.play(audioPath+'wall_hit.wav')
+    })
+
+    socket.on('door encounter',function(data){
+      createjs.Sound.play(audioPath+'locked_door.wav')
+
+    })
+
     socket.emit('test2',{data:5});
     console.log(socket);
+
+    socket.on('chat-data', function(data){
+      // update chat
+      console.debug('Socket Messages Chat: ',data)
+      messages = data.messages;
+      setMsg()
+
+    })
+
+    function setHp(e){
+      e.preventDefault();
+      var pHP = hpvalue.value;
+      socket.emit('update hp', {newhp: pHP})
+
+    }
+
+    function setName(e){
+      e.preventDefault();
+      var pName = namevalue.value;
+      socket.emit('update name', {newname: pName})
+
+    }
+
+    function setMsg(){
+      chatStream.innerHTML = "";
+       createjs.Sound.play(audioPath+'chat_message.wav');
+      for(var x=0; x < messages.length; x++){
+        console.debug('Sending Messages...')
+        chatStream.innerHTML += messages[x];
+        chatStream.scrollIntoView();
+
+        chatStream.scrollTop = chatStream.scrollHeight;
+      }
+    }
+
+
+    function getMsg(e){
+      e.preventDefault();
+
+      var msg = chat.value;
+      messages.push(msg)
+      console.debug("Messages: ",messages)
+      socket.emit('chat', messages)
+      // if(e.keycode === 13){
+      //
+      //
+      //   messages.push("<div>User: "+socket.id+" : "+msg+"</div>")
+      //   console.debug("Messages: ",messages)
+      //   // e.preventDefault();
+      //
+      //   // socket.emit('chat', {messages: messages})
+      // }
+
+    }
+
+    function retrieveRoomData(){
+      console.log('Room# ',room.value)
+      ctx.clearRect(0,0, canvas.width, canvas.height);
+      socket.emit('retrieve room data',{msg: 'requesting room data..',room: room.value})
+    }
+
 
     function moveRight(){
       console.log("RIGHT");
@@ -77,15 +327,19 @@ block content
         dir: [0,+1],
         id:socket.id,
       });
+      createjs.Sound.play(audioPath+'stepSound.mp3')
     }
 
     function moveLeft(){
       console.log("LEFT");
+
       socket.emit('move',{
         msg: "Moving "+socket.id+" Left",
         dir:[0,-1],
         id:socket.id,
+
       });
+      createjs.Sound.play(audioPath+'stepSound.mp3')
     }
 
     function moveUp(){
@@ -95,6 +349,7 @@ block content
         dir:[-1,0],
         id:socket.id,
       });
+      createjs.Sound.play(audioPath+'stepSound.mp3')
     }
 
     function moveDown(){
@@ -104,7 +359,24 @@ block content
         dir:[+1,0],
         id:socket.id,
       });
+      createjs.Sound.play(audioPath+'stepSound.mp3')
     }
+
+
+    function playSound(){
+
+    }
+
+    function zoomIn(){
+      if(zoom < zoomLevels.length-1)
+        zoom +=1
+    }
+
+    function zoomOut(){
+      if(zoom !== 0)
+        zoom -=1
+    }
+
 
 
     function reset(){

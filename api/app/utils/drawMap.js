@@ -26,7 +26,7 @@ class DrawMap{
             this.floor = new Image();
             this.floor.src = fs.readFileSync('./public/images/surfaces/pixelfloor2specked32x32.jpg');
             this.wall = new Image();
-            this.wall.src = fs.readFileSync('./public/images/surfaces/wallcorner32x32.jpg');
+            this.wall.src = fs.readFileSync('./public/images/surfaces/hollow_wall_32x32.png');
             this.player = new Image();
             // this.player.src = fs.readFileSync('./public/images/_AVATAR__sm.jpg');
             this.doorR = new Image();
@@ -38,9 +38,9 @@ class DrawMap{
             this.doorS = new Image();
             this.doorS.src = fs.readFileSync('./public/images/surfaces/door_b_32x32.png');
             this.hidden = new Image();
-            this.hidden.src = fs.readFileSync('./public/images/surfaces/hidden_square_32x32.jpg');
+            this.hidden.src = fs.readFileSync('./public/images/surfaces/blank_32x32.png');
             this.gold_coin = new Image();
-            this.gold_coin.src = fs.readFileSync('./public/images/items/coin_gold_32x32.png');
+            this.gold_coin.src = fs.readFileSync('./public/images/items/coin_float_32x32.png');
 
 
             this.sizexy = 0;
@@ -54,8 +54,9 @@ class DrawMap{
             this.roomObjectsCoords = [];
 
 
-            this.playerFolder = './players/_'+moment().format("MMYY")+'/';
-            this.mapFolder = './public/images/map/';
+            this.playerFolder = './gamefiles/players/_'+moment().format("MMYY")+'/';
+            this.mapFolder = './gamefiles/map/';
+
 
 
         }
@@ -71,7 +72,7 @@ class DrawMap{
 
    }
 
-   
+
    // For testing/Debug
    createPreBuiltRoom(){
 
@@ -89,19 +90,37 @@ class DrawMap{
              [1,0,0,0,0,0,1]
         ];
 
+       let room2 = [
+
+               [99,99,99,99,99,99,99,99,99,99],
+               [99,99,99,99,99,99,99,99,99,99],
+               [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+               [1,0,0,0,0,0,0,0,0,0,0,1,1,1],
+               [1,0,0,0,0,0,0,0,0,0,0,1,1,1],
+               [4,0,0,0,0,0,0,0,0,1,1,1,1,1],
+               [1,0,0,0,0,0,0,0,0,0,1,1,1,1],
+               [1,1,1,0,0,0,0,0,0,0,0,0,0,1],
+               [99,99,1,0,0,0,1,1,1,1,1,1,1],
+               [99,99,1,1,3,1,1]
+       ];
+
        let room = [
 
-               [1,99,99,99,99,99,99,1],
-               [1,99,99,99,99,99,99,1],
-               [1,1,1,1,1,1,1,1,1,1],
-               [1,0,0,0,0,0,0,1,1,1],
-               [1,0,0,0,0,0,0,1,1,1],
-               [4,0,0,0,0,0,0,0,0,1],
-               [1,0,0,0,0,0,1,1,1,1],
-               [1,1,0,0,0,0,1],
-               [99,99,1,0,0,0,1],
-               [99,99,99,1,3,1,1]
-       ];
+                [1,9,9,9,9,4,9,9,9,9,1],
+                [9,0,0,0,0,0,0,0,0,0,9],
+                [9,0,0,0,0,0,0,0,0,0,9],
+                [9,0,0,0,0,0,0,0,0,0,9],
+                [3,0,0,0,1,0,1,0,0,0,2],
+                [9,0,0,0,0,1,0,0,0,0,9],
+                [9,0,0,0,1,0,1,0,0,0,9],
+                [9,0,0,0,0,0,0,0,0,0,9],
+                [9,0,0,0,0,0,0,0,0,0,9],
+                [1,9,9,9,9,5,9,9,9,9,1],
+
+       ]
+
+       
+
 
 
         let rows = room[0].length;
@@ -115,24 +134,30 @@ class DrawMap{
         return {room:room, playerLoc:{posX:this.playerLoc[0],posY:this.playerLoc[1]}};
 
     };
-   //
-   //
-   // static createRandomRoom()
-   //  {
-   //      let roomBuilder = _.fill(Array(32), 0);
-   //
-   //      console.log('Initial Room', roomBuilder);
-   //
-   //      let room = _.chunk(roomBuilder, 6);
-   //
-   //      console.log('Room chunked.. ', room);
-   //
-   //      return room;
-   //  };
+
+
+
+   createRandomRoom()
+    {
+        let roomBuilder = _.fill(Array(_.random(63,120)), 0);
+
+        // console.log('Initial Room', roomBuilder);
+
+        let room = _.chunk(roomBuilder, _.random(6,12));
+
+        // console.log('Room chunked.. ', room,roomBuilder.length,room.length);
+
+        jsonfile.writeFileSync(this.mapFolder+'game_map.json', room);
+
+        return {room:room, playerLoc:{PosX:this.playerLoc[0], posY:this.playerLoc[1]}};
+    };
 
 
    buildRoom(roomData){
-
+       let roomNum = 0;
+       if(roomData.roomNum != undefined){
+         roomNum = roomData.roomNum;
+       } 
        let room = roomData.room;
        let playerLoc = roomData.playerLoc;
        let players = roomData.playersIDs;
@@ -149,8 +174,10 @@ class DrawMap{
 
 
 
-       let v = Logger.w("Player Info ",roomData.playersIDs);
-       this.writeToLog(v, 'roomLog');
+      //  let v = Logger.w("Player Info ",roomData.playersIDs);
+      //  this.writeToLog(v, 'roomLog');
+
+      //  Logger.w('RoomData info: ',roomData)
 
        // Easeljs setup image builder;
        this.sizexy = room.length;
@@ -181,21 +208,23 @@ class DrawMap{
 
        // Create arrays of 2 dimensional room
        // _.fill((8), [0,0,0,0,0,0,0,0]);
-       let rWall = _.fill(Array(rows), 1);
 
-       room[0] = rWall;
-       room[cols] = rWall;
+       // r-l walls
+    //    let rWall = _.fill(Array(rows), 1);
+
+    //    room[0] = rWall;
+    //    room[cols] = rWall;
 
 
 
        // create vertical walls
-       _.forEach((room), (value, col) => {
-           _.forEach((value), (tileValue, row) => {
-               if (row === 0 || row === value.length - 1 && tileValue === 0) {
-                   room[col][row] = 1;
-               }
-           })
-       });
+    //    _.forEach((room), (value, col) => {
+    //        _.forEach((value), (tileValue, row) => {
+    //            if (row === 0 || row === value.length - 1 && tileValue === 0) {
+    //                room[col][row] = 1;
+    //            }
+    //        })
+    //    });
 
        /*
        *   Cycle through players and place on board..
@@ -203,7 +232,7 @@ class DrawMap{
        */
 
 
-       const setImage = (image,src="",gridLoc=[0,0]) => {
+       const setImage = (image, src="", gridLoc=[0,0]) => {
 
 
            this.bitmap = new createjs.Bitmap(image);
@@ -226,7 +255,7 @@ class DrawMap{
        _.forEach(players, function(value,key){
         //  console.log('Players: ',key,value)
           _.forEach(value, function(val, key){
-              Logger.e('Player: ', val, key);
+              // Logger.e('Player: ', val, key);
               playerInfo = jsonfile.readFileSync(playerFolder+val.player.id+"_.json",'utf8');
               let p = playerInfo.player.loc;
               room[p.posX][p.posY] = playerInfo.playerData.number;
@@ -234,7 +263,7 @@ class DrawMap{
 
 
 
-              console.log('Room: Player Added..',room)
+              // console.log('Room: Player Added..',room)
 
 
 
@@ -263,21 +292,25 @@ class DrawMap{
                        this.bitmap = setImage(this.doorR,"door right",[key,ikey]);
                        break;
                    case 3:
-                       this.bitmap = setImage(this.doorS,"door south",[key,ikey]);
-                       break;
-                   case 4:
                        this.bitmap = setImage(this.doorL,"door left",[key,ikey]);
                        break;
+                   case 4:
+                        this.bitmap = setImage(this.doorN,"door north",[key,ikey]);
+                        break;
+                   case 5:
+                       this.bitmap = setImage(this.doorS,"door south",[key,ikey]);
+                       break;
+
                    case 20:
                        this.bitmap = setImage(this.gold_coin,"gold coin",[key,ikey]);
                        break;
                    case 100:
 
                        _.forEach(roomData.playersIDs.playerIds, (value, key) =>{
-                           Logger.i('Player ID Value: ',value, key);
-                           Logger.i('Number: ',value.player.number);
+                          //  Logger.i('Player ID Value: ',value, key);
+                          //  Logger.i('Number: ',value.player.number);
                            if(value.player.number === 100) {
-                               Logger.i('Player Avatar 100: ',value.player.avatar);
+                              //  Logger.i('Player Avatar 100: ',value.player.avatar);
                                let player_100 = new Image();
                                player_100.src = value.player.avatar;
                                this.bitmap = setImage(player_100,player_100.src,[key,ikey]);
@@ -289,7 +322,7 @@ class DrawMap{
 
                        _.forEach(roomData.playersIDs.playerIds, (value, key) => {
                            let player_101 = new Image();
-                           Logger.i('Player ID Value: ',value);
+                          //  Logger.i('Player ID Value: ',value);
                            if (value.player.number === 101) {
                                player_101.src = value.player.avatar;
                                this.bitmap = setImage(player_101,player_101.src,[key,ikey]);
@@ -301,7 +334,7 @@ class DrawMap{
 
                        _.forEach(roomData.playersIDs.playerIds, (value, key) => {
                            let player_102 = new Image();
-                           Logger.i('Player ID Value: ',value);
+                          //  Logger.i('Player ID Value: ',value);
                            if (value.player.number === 102) {
                                player_102.src = value.player.avatar;
                                this.bitmap = setImage(player_102,player_102.src,[key,ikey]);
@@ -314,7 +347,7 @@ class DrawMap{
 
                        _.forEach(roomData.playersIDs.playerIds, (value, key) => {
                            let player_103 = new Image();
-                           Logger.i('Player ID Value: ',value);
+                          //  Logger.i('Player ID Value: ',value);
                            if (value.player.number === 103) {
                                player_103.src = value.player.avatar;
                                this.bitmap = setImage(player_103,player_103.src,[key,ikey]);
@@ -322,7 +355,7 @@ class DrawMap{
                            }
                        });
                        break;
-                   case 99:
+                   case 9:
                        this.bitmap = setImage(this.hidden,'empty square',[key,ikey]);
                        break;
                    default:
@@ -348,7 +381,14 @@ class DrawMap{
        this.roomObjectsCoords.push({posX:this.bitmap.x,posY:this.bitmap.y,tile:"coin",gridLoc:[0,0]});
        stage.addChild(this.bitmap);
 
-       Logger.w('Room Objects: ',this.roomObjectsCoords);
+       this.bitmap = new createjs.Bitmap(this.gold_coin);
+       this.bitmap.x = 165;
+       this.bitmap.y = 296;
+       this.roomObjectsCoords.push({posX:this.bitmap.x,posY:this.bitmap.y,tile:"coin",gridLoc:[8,4]});
+       stage.addChild(this.bitmap);
+
+
+      //  Logger.w('Room Objects: ',this.roomObjectsCoords);
 
        stage.addChild(square);
        stage.update();
@@ -371,8 +411,8 @@ class DrawMap{
 
       createjs.Ticker.halt();
 
-      v = Logger.d('Map Drawn..');
-      this.writeToLog(v, 'roomLog');
+      // v = Logger.d('Map Drawn..');
+      // this.writeToLog(v, 'roomLog');
 
    };
 

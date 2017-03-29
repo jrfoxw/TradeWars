@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  div
+    h3= title
+
+  div#timageHolder
+    canvas#canvas(width='900', height='900' style='border:3px solid #000; background-color: black;')
+
+
+  script.
+    var socket = io('http://192.168.1.130:3005');
+    var ctx = document.getElementById('canvas').getContext("2d");
+    var image;
+
+
+    socket.on('map data',function(data){
+        console.log('Incoming Map Data: ',data)
+        console.log('Socket ',socket);
+        // image = data.data;
+        var img = new Image();
+        img.src = 'data:image/jpeg;base64,' + data.data;
+        ctx.drawImage(img,0,0);
+    });

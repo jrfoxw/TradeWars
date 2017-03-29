@@ -2,9 +2,48 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='./public/stylesheets/style.css')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js')
+    script(src="https://code.createjs.com/soundjs-0.6.2.min.js")
+    script.
 
 
-  body
+
+        function init(){
+             var audioPath = './public/sounds/';
+
+        //{id: "dungeon_score",     src: "ambient_score.mp3",  loop:-1},
+        var sounds = [
+
+            {id: "bite",              src: "thing_bite.wav" ,    loop:0},
+            {id: "deflect",           src: "deflect.mp3",        loop:0},
+            {id: "step",              src: "stepSound.mp3",      loop:0},
+            {id: "walk",              src: "walk.wav",           loop:0},
+            {id: "wall_hit",          src: "wall_hit.wav",       loop:0},
+            {id: "locked_door",       src: "locked_door.wav",    loop:0},
+            {id: "send_chat",         src: "chat_message.wav",   loop:0},
+            {id: "enter_chat",        src: "chat_connect.mp3",     loop:0},
+            {id: "exit_chat",         src: "chat_disconnect.mp3",      loop:0},
+            {id: "heartbeat",         src: "heartbeat.wav",      loop:0},
+
+        ];
+
+            createjs.Sound.addEventListener("fileload", handleLoad);
+            createjs.Sound.registerSounds(sounds, audioPath);
+
+
+
+        }
+
+  body(onLoad="init()")
+    script.
+        function handleLoad(event) {
+            var score_ppc = new createjs.PlayPropsConfig().set({loop:-1})
+            createjs.Sound.play(event.src,{loop: event.loop})
+            
+
+            // if(event.id === "dungeon_score")
+            //     createjs.Sound.play(event.src,score_ppc)
+        }
+
     block content
